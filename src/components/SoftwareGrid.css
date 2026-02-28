@@ -1,0 +1,23 @@
+.software-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.3rem;
+}
+
+.empty-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  border: 1px dashed #b9cbff;
+  border-radius: 16px;
+  color: var(--text-soft);
+  background: var(--surface-soft);
+}
+
+.empty-state h3 {
+  margin: 0;
+  color: var(--text-main);
+}
+
+.empty-state p {
+  margin: 0.35rem 0 0;
+}

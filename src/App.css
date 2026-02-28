@@ -1,0 +1,70 @@
+.app-shell {
+  min-height: 100vh;
+}
+
+.content-wrap {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 1rem 1rem 2.2rem;
+}
+
+.discovery-panel {
+  margin-top: 1.4rem;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 22px;
+  box-shadow: 0 24px 36px -30px rgba(39, 79, 180, 0.45);
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-row h2 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+}
+
+.platform-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.platform-chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text-main);
+  padding: 0.45rem 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.platform-chip:hover {
+  border-color: #9fb8ff;
+}
+
+.platform-chip.active {
+  border-color: var(--primary-strong);
+  background: linear-gradient(130deg, var(--primary), var(--accent));
+  color: var(--color-white);
+}
+
+@media (max-width: 760px) {
+  .content-wrap {
+    padding: 0.8rem;
+  }
+
+  .discovery-panel {
+    border-radius: 16px;
+    padding: 1rem;
+  }
+}

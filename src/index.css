@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --color-white: #ffffff;
+  --color-black: #0f172a;
+  --bg-main: #f5f8ff;
+  --bg-spot: #dff0ff;
+  --bg-top: #f9fbff;
+  --panel: var(--color-white);
+  --surface-soft: #f2f6ff;
+  --text-main: var(--color-black);
+  --text-soft: #5d6780;
+  --line: #d7e2ff;
+  --primary: #2a63ff;
+  --primary-strong: #1f4fd1;
+  --accent: #0cc4b8;
+  --accent-warm: #ff7f50;
+}
+
+[data-theme='dark'] {
+  --color-white: #0b1220;
+  --color-black: #ffffff;
+  --bg-main: #070d19;
+  --bg-spot: #123056;
+  --bg-top: #0b1425;
+  --panel: #121b2e;
+  --surface-soft: #19253d;
+  --text-soft: #a9b7da;
+  --line: #233452;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  font-family: 'Manrope', 'Segoe UI', Tahoma, sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 85% 10%, var(--bg-spot) 0%, rgba(223, 240, 255, 0.1) 35%),
+    linear-gradient(180deg, var(--bg-top), var(--bg-main));
+}
+
+h1,
+h2,
+h3,
+.brand-mark {
+  font-family: 'Manrope', 'Segoe UI', Tahoma, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
