@@ -14,7 +14,7 @@ function SoftwareGrid({ items }) {
   return (
     <div className="software-grid">
       {items.map((item) => (
-        <SoftwareCard key={item.id} item={item} />
+        <SoftwareCard key={item._id || item.id || item.name} item={item} />
       ))}
     </div>
   )

@@ -1,6 +1,8 @@
 import './SoftwareCard.css'
 
 function SoftwareCard({ item }) {
+  const platforms = Array.isArray(item.platforms) ? item.platforms : []
+
   return (
     <article className="software-card">
       <div className="card-top">
@@ -10,7 +12,7 @@ function SoftwareCard({ item }) {
         <span className="card-badge">{item.badge}</span>
       </div>
       <h3>{item.name}</h3>
-      <p>{item.category}</p>
+      <p>{item.category || 'Uncategorized'}</p>
 
       <div className="meta-row">
         <span>⭐ {item.rating}</span>
@@ -18,7 +20,7 @@ function SoftwareCard({ item }) {
       </div>
 
       <div className="platform-row">
-        {item.platforms.map((platform) => (
+        {platforms.map((platform) => (
           <small key={platform}>{platform}</small>
         ))}
       </div>

@@ -4,11 +4,14 @@ const Schema = mongoose.Schema;
 
 const SoftwareSchema = new Schema({
   name: { type: String, required: true },
+  category: { type: String, required: true },
+  platforms: { type: [String], default: [] },
   description: { type: String, required: true },
   version: { type: String, required: true },
   license: { type: String, required: true },
   repositoryUrl: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+  isPremium: { type: Boolean, default: false }
 });
 
 const UserSchema = new Schema({
