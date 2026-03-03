@@ -1,7 +1,7 @@
 import SoftwareCard from './SoftwareCard'
 import './SoftwareGrid.css'
 
-function SoftwareGrid({ items }) {
+function SoftwareGrid({ items, onView }) {
   if (items.length === 0) {
     return (
       <div className="empty-state">
@@ -14,7 +14,7 @@ function SoftwareGrid({ items }) {
   return (
     <div className="software-grid">
       {items.map((item) => (
-        <SoftwareCard key={item._id || item.id || item.name} item={item} />
+        <SoftwareCard key={item._id || item.id || item.name} item={item} onView={onView} />
       ))}
     </div>
   )

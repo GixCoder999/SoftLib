@@ -17,6 +17,11 @@
   background: linear-gradient(135deg, var(--primary), #6b87ff);
 }
 
+.brand-button {
+  border: 0;
+  cursor: pointer;
+}
+
 .brand-subtitle {
   margin: 0.5rem 0 0;
   font-size: 0.86rem;
@@ -52,7 +57,16 @@
   color: var(--text-soft);
 }
 
-.quick-nav a:hover {
+.quick-nav .linkish {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.quick-nav .linkish:hover {
   color: var(--primary-strong);
 }
 

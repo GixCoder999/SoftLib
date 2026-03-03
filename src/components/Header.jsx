@@ -1,27 +1,43 @@
 import './Header.css'
 
-function Header({ searchTerm, onSearchChange, isDark, onToggleTheme }) {
+function Header({
+  searchTerm,
+  onSearchChange,
+  isDark,
+  onToggleTheme,
+  hideSearch,
+  onAuthClick,
+  onHomeClick,
+  onBrandClick,
+}) {
   return (
     <header className="topbar">
       <div className="brand-block">
-        <span className="brand-mark">SoftLib</span>
+        <button type="button" className="brand-mark brand-button" onClick={onBrandClick}>
+          SoftLib
+        </button>
         <p className="brand-subtitle">Public software collection for mobile and desktop</p>
       </div>
 
       <div className="search-area">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Search software, categories, and tools..."
-        />
+        {!hideSearch && (
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Search software, categories, and tools..."
+          />
+        )}
       </div>
 
       <div className="header-actions">
         <nav className="quick-nav">
-          <a href="#">Latest</a>
-          <a href="#">Top Charts</a>
-          <a href="#">Categories</a>
+          <button type="button" className="linkish" onClick={onHomeClick}>
+            Home
+          </button>
+          <button type="button" className="linkish" onClick={onAuthClick}>
+            Sign In / Up
+          </button>
         </nav>
         <button
           type="button"

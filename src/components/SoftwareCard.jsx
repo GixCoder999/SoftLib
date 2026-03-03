@@ -1,6 +1,6 @@
 import './SoftwareCard.css'
 
-function SoftwareCard({ item }) {
+function SoftwareCard({ item, onView }) {
   const platforms = Array.isArray(item.platforms) ? item.platforms : []
 
   return (
@@ -26,8 +26,10 @@ function SoftwareCard({ item }) {
       </div>
 
       <div className="card-footer">
-        <strong>{item.price}</strong>
-        <button>View</button>
+        <strong>{item.isPremium ? 'Premium' : 'Free'}</strong>
+        <button type="button" onClick={() => onView?.(item._id || item.id)}>
+          View
+        </button>
       </div>
     </article>
   )
