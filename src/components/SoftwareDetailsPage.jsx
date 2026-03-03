@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
 import './SoftwareDetailsPage.css'
 
-function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack, onAuthRequired }) {
+function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack }) {
   const [software, setSoftware] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [countdown, setCountdown] = useState(0)
   const [downloading, setDownloading] = useState(false)
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+  const [selectedReview, setSelectedReview] = useState(0)
+  const [reviewSubmitting, setReviewSubmitting] = useState(false)
+  const [reviewFeedback, setReviewFeedback] = useState('')
 
   useEffect(() => {
     let isMounted = true
@@ -55,22 +59,33 @@ function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack, onAuthRequired })
     }
 
     try {
-      const response = await fetch(`${apiBaseUrl}/software/${softwareId}/download?redirect=false`, {
-        credentials: 'include',
-      })
+      const response = await fetch(`${apiBaseUrl}/software/${softwareId}/download?redirect=false`)
       const result = await response.json()
 
       if (!response.ok) {
-        if (response.status === 401) {
-          setError('Please sign in first to download this software.')
-          onAuthRequired?.()
-          return
-        }
         throw new Error(result.error || 'Failed to prepare download')
       }
 
       if (result.downloadUrl) {
-        window.location.assign(result.downloadUrl)
+        setSoftware((currentSoftware) => {
+          if (!currentSoftware) {
+            return currentSoftware
+          }
+
+          return {
+            ...currentSoftware,
+            downloads: Number.isFinite(result.downloads)
+              ? result.downloads
+              : (Number.isFinite(currentSoftware.downloads) ? currentSoftware.downloads + 1 : 1),
+          }
+        })
+        const popup = window.open(result.downloadUrl, '_blank', 'noopener,noreferrer')
+        if (!popup) {
+          window.location.assign(result.downloadUrl)
+        }
+        setSelectedReview(0)
+        setReviewFeedback('')
+        setIsReviewModalOpen(true)
       } else {
         throw new Error('Download URL missing in response')
       }
@@ -97,6 +112,48 @@ function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack, onAuthRequired })
   }
 
   const platforms = Array.isArray(software?.platforms) ? software.platforms : []
+  const review = Number.isFinite(software?.review) ? software.review : 0
+  const downloads = Number.isFinite(software?.downloads) ? software.downloads : 0
+
+  const submitReview = async () => {
+    if (!selectedReview || reviewSubmitting) {
+      return
+    }
+
+    setReviewSubmitting(true)
+    setReviewFeedback('')
+    try {
+      const response = await fetch(`${apiBaseUrl}/software/${softwareId}/review`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ review: selectedReview }),
+      })
+      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit review')
+      }
+
+      setSoftware((currentSoftware) => {
+        if (!currentSoftware) {
+          return currentSoftware
+        }
+        return {
+          ...currentSoftware,
+          review: Number.isFinite(result.review) ? result.review : selectedReview,
+        }
+      })
+      setReviewFeedback('Thanks for your review.')
+      setTimeout(() => {
+        setIsReviewModalOpen(false)
+      }, 650)
+    } catch (requestError) {
+      setReviewFeedback(requestError.message)
+    } finally {
+      setReviewSubmitting(false)
+    }
+  }
 
   return (
     <section className="details-panel">
@@ -124,6 +181,14 @@ function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack, onAuthRequired })
           <span>Type</span>
           <strong>{software?.isPremium ? 'Premium' : 'Free'}</strong>
         </div>
+        <div>
+          <span>Review</span>
+          <strong>{review.toFixed(1)}/5</strong>
+        </div>
+        <div>
+          <span>Downloads</span>
+          <strong>{downloads}</strong>
+        </div>
       </div>
 
       <div className="platform-row details-platforms">
@@ -137,6 +202,47 @@ function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack, onAuthRequired })
       </button>
 
       {error && <p className="details-error">{error}</p>}
+
+      {isReviewModalOpen && (
+        <div className="review-modal-backdrop" role="dialog" aria-modal="true" aria-label="Rate software">
+          <div className="review-modal">
+            <h3>Rate this software</h3>
+            <p>How would you rate your download experience?</p>
+            <div className="review-stars">
+              {[1, 2, 3, 4, 5].map((starValue) => (
+                <button
+                  key={starValue}
+                  type="button"
+                  className={`star-btn ${selectedReview >= starValue ? 'active' : ''}`}
+                  onClick={() => setSelectedReview(starValue)}
+                  aria-label={`Rate ${starValue} star${starValue > 1 ? 's' : ''}`}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+            <div className="review-actions">
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => setIsReviewModalOpen(false)}
+                disabled={reviewSubmitting}
+              >
+                Skip
+              </button>
+              <button
+                type="button"
+                className="download-btn"
+                onClick={submitReview}
+                disabled={!selectedReview || reviewSubmitting}
+              >
+                {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </div>
+            {reviewFeedback && <p className="review-feedback">{reviewFeedback}</p>}
+          </div>
+        </div>
+      )}
     </section>
   )
 }

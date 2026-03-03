@@ -21,6 +21,27 @@ const UserSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+const SoftwareStatsSchema = new Schema({
+  softwareId: {
+    type: Schema.Types.ObjectId,
+    ref: "Software",
+    required: true,
+    unique: true,
+  },
+  review: {
+    type: Number,
+    required: true,
+    min: 0,
+    max: 5,
+    set: (value) => Math.round(value * 10) / 10,
+    validate: {
+      validator: (value) => Number.isInteger(value * 10),
+      message: "Review must have only 1 decimal place",
+    },
+  },
+  downloads: { type: Number, required: true, default: 0, min: 0 },
+});
+
 
 const Software =
   mongoose.models.Software || 
@@ -30,6 +51,9 @@ const User =
     mongoose.models.User || 
     mongoose.model("User", UserSchema);
 
+const SoftwareStats =
+  mongoose.models.SoftwareStats ||
+  mongoose.model("SoftwareStats", SoftwareStatsSchema);
 
 
-module.exports = { Software, User };
+module.exports = { Software, User, SoftwareStats };

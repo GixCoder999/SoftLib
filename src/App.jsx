@@ -87,6 +87,8 @@ function App() {
           ...item,
           category: item.category ?? 'Uncategorized',
           platforms: Array.isArray(item.platforms) ? item.platforms : [],
+          review: Number.isFinite(item.review) ? item.review : 0,
+          downloads: Number.isFinite(item.downloads) ? item.downloads : 0,
         }))
         console.log('Fetched software:', normalizedData)
         setSoftwareData(normalizedData)
@@ -161,7 +163,6 @@ function App() {
             apiBaseUrl={API_BASE_URL}
             softwareId={softwareIdFromRoute}
             onBack={() => navigateTo('/')}
-            onAuthRequired={() => navigateTo('/auth')}
           />
         )}
       </main>

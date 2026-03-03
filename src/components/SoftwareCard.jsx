@@ -2,6 +2,8 @@ import './SoftwareCard.css'
 
 function SoftwareCard({ item, onView }) {
   const platforms = Array.isArray(item.platforms) ? item.platforms : []
+  const rating = Number.isFinite(item.review) ? item.review : 0
+  const downloads = Number.isFinite(item.downloads) ? item.downloads : 0
 
   return (
     <article className="software-card">
@@ -15,8 +17,8 @@ function SoftwareCard({ item, onView }) {
       <p>{item.category || 'Uncategorized'}</p>
 
       <div className="meta-row">
-        <span>⭐ {item.rating}</span>
-        <span>{item.downloads} downloads</span>
+        <span>⭐ {rating.toFixed(1)}/5</span>
+        <span>{downloads} downloads</span>
       </div>
 
       <div className="platform-row">

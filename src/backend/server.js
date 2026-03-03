@@ -8,8 +8,8 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const ConnectDB = require("./db.js");
-const { Software } = require("./Schema.js");
-const { authMiddleware, registerUser, loginUser } = require("./auth.js");
+const { Software, SoftwareStats } = require("./Schema.js");
+const { registerUser, loginUser } = require("./auth.js");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -82,8 +82,23 @@ startServer();
 
 app.get("/software", async (req, res) => {
   try {
-    const softwareList = await Software.find();
-    res.json(softwareList);
+    const softwareList = await Software.find().lean();
+    const softwareIds = softwareList.map((software) => software._id);
+    const statsList = await SoftwareStats.find({ softwareId: { $in: softwareIds } }).lean();
+    const statsBySoftwareId = new Map(
+      statsList.map((stats) => [stats.softwareId.toString(), stats])
+    );
+
+    const enrichedSoftwareList = softwareList.map((software) => {
+      const stats = statsBySoftwareId.get(software._id.toString());
+      return {
+        ...software,
+        review: stats?.review ?? 0,
+        downloads: stats?.downloads ?? 0,
+      };
+    });
+
+    res.json(enrichedSoftwareList);
   }
   catch (error) {
     console.error("Error fetching software:", error.message);
@@ -95,16 +110,58 @@ app.get('/software/:id',async (req,res)=>{
   try {
     const softwareId = req.params.id;
     console.log('Fetching software with ID:', softwareId);
-    const soft = await Software.findById(softwareId)
+    const soft = await Software.findById(softwareId).lean();
     
     if (!soft) {
       return res.status(404).json({ error: "Software not found" });
     }
-    res.json(soft);
+
+    const stats = await SoftwareStats.findOne({ softwareId: soft._id }).lean();
+    res.json({
+      ...soft,
+      review: stats?.review ?? 0,
+      downloads: stats?.downloads ?? 0,
+    });
   }
   catch (error) {
     console.error("Error fetching software:", error.message);
     res.status(500).json({ error: "Failed to fetch software" });
+  }
+});
+
+app.post("/software/:id/review", async (req, res) => {
+  try {
+    const softwareId = req.params.id;
+    const rawReview = Number(req.body?.review);
+
+    if (!mongoose.Types.ObjectId.isValid(softwareId)) {
+      return res.status(400).json({ error: "Invalid software id" });
+    }
+
+    if (!Number.isFinite(rawReview) || rawReview < 1 || rawReview > 5) {
+      return res.status(400).json({ error: "Review must be a number between 1 and 5" });
+    }
+
+    const software = await Software.findById(softwareId).select("_id");
+    if (!software) {
+      return res.status(404).json({ error: "Software not found" });
+    }
+
+    const roundedReview = Math.round(rawReview * 10) / 10;
+    const updatedStats = await SoftwareStats.findOneAndUpdate(
+      { softwareId: software._id },
+      { $set: { review: roundedReview }, $setOnInsert: { downloads: 0 } },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+
+    return res.json({
+      message: "Review submitted",
+      softwareId: software._id,
+      review: updatedStats.review,
+    });
+  } catch (error) {
+    console.error("Error submitting review:", error.message);
+    return res.status(500).json({ error: "Failed to submit review" });
   }
 });
 
@@ -126,6 +183,12 @@ const downloadSoftware = async (req, res) => {
       return res.status(400).json({ error: "Download link is not available" });
     }
 
+    const updatedStats = await SoftwareStats.findOneAndUpdate(
+      { softwareId: software._id },
+      { $inc: { downloads: 1 }, $setOnInsert: { review: 0 } },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+
     const downloadUrl = getDropboxDirectDownloadUrl(software.repositoryUrl);
     if (!downloadUrl) {
       return res.status(400).json({
@@ -141,6 +204,7 @@ const downloadSoftware = async (req, res) => {
       message: "Download link generated",
       softwareId: software._id,
       name: software.name,
+      downloads: updatedStats.downloads,
       downloadUrl,
     });
   } catch (error) {
@@ -149,7 +213,7 @@ const downloadSoftware = async (req, res) => {
   }
 };
 
-app.get("/software/:id/download", authMiddleware, downloadSoftware);
+app.get("/software/:id/download", downloadSoftware);
 
 function getDropboxDirectDownloadUrl(rawUrl) {
   try {
