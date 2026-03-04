@@ -1,10 +1,18 @@
 const { User } = require("./Schema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
-const ADMIN_USERNAME = "msohaib-adm";
-const ADMIN_EMAIL = "msohaib@adm00";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "msohaib-adm-pass";
+const requireEnv = (name) => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+};
+
+const JWT_SECRET = requireEnv("JWT_SECRET");
+const ADMIN_USERNAME = requireEnv("ADMIN_USERNAME");
+const ADMIN_EMAIL = requireEnv("ADMIN_EMAIL");
+const ADMIN_PASSWORD = requireEnv("ADMIN_PASSWORD");
 
 async function registerUser(username, email, password) {
   try {

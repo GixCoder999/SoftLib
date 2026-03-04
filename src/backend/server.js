@@ -20,8 +20,16 @@ const {
 } = require("./auth.js");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
+const requireEnv = (name) => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+};
+
+const PORT = requireEnv("PORT");
+const CORS_ORIGIN = requireEnv("CORS_ORIGIN");
 
 app.use(
   cors({
