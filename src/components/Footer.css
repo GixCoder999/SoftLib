@@ -26,3 +26,16 @@
 .footer a:hover {
   color: var(--primary-strong);
 }
+
+.footer-linkish {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.footer-linkish:hover {
+  color: var(--primary-strong);
+}

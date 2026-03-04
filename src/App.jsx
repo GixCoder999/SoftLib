@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import './App.css'
 import Header from './components/Header'
 import HeroSection from './components/HeroSection'
@@ -7,6 +7,10 @@ import SoftwareGrid from './components/SoftwareGrid'
 import Footer from './components/Footer'
 import AuthPage from './components/AuthPage'
 import SoftwareDetailsPage from './components/SoftwareDetailsPage'
+import SubmitSoftwarePage from './components/SubmitSoftwarePage'
+import AdminReviewPage from './components/AdminReviewPage'
+import PrivacyPage from './components/PrivacyPage'
+import SupportPage from './components/SupportPage'
 
 const TestConnection = async () => {
   try {
@@ -31,6 +35,9 @@ function App() {
   const [activePlatform, setActivePlatform] = useState('All')
   const [activeCategory, setActiveCategory] = useState('All')
   const [isDark, setIsDark] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
   const [softwareData, setSoftwareData] = useState([])
   const [filteredSoftware, setFilteredSoftware] = useState([])
 
@@ -78,6 +85,41 @@ function App() {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
   }, [isDark])
 
+  const syncAuthState = useCallback(async () => {
+    try {
+      const authResponse = await fetch(`${API_BASE_URL}/auth/status`, {
+        credentials: 'include',
+      })
+      if (!authResponse.ok) {
+        setIsAuthenticated(false)
+        setIsAdmin(false)
+        return
+      }
+
+      setIsAuthenticated(true)
+      const adminResponse = await fetch(`${API_BASE_URL}/auth/admin-status`, {
+        credentials: 'include',
+      })
+
+      if (!adminResponse.ok) {
+        setIsAdmin(false)
+        return
+      }
+
+      const adminData = await adminResponse.json()
+      setIsAdmin(Boolean(adminData?.isAdmin))
+    } catch (error) {
+      setIsAuthenticated(false)
+      setIsAdmin(false)
+    } finally {
+      setAuthChecked(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    syncAuthState()
+  }, [syncAuthState])
+
   useEffect(() => {
     const fetchSoftware = async () => {
       try {
@@ -105,18 +147,67 @@ function App() {
 
   const isHomeRoute = routePath === '/'
   const isAuthRoute = routePath === '/auth'
+  const isSubmitRoute = routePath === '/submit'
+  const isAdminReviewRoute = routePath === '/admin/review'
+  const isPrivacyRoute = routePath === '/privacy'
+  const isSupportRoute = routePath === '/support'
   const isSoftwareDetailsRoute = Boolean(softwareIdFromRoute)
+  const navigateToSubmit = () => {
+    if (!isAuthenticated) {
+      navigateTo('/auth')
+      return
+    }
+    navigateTo('/submit')
+  }
+
+  const navigateToAdminReview = () => {
+    if (!isAdmin) {
+      navigateTo('/')
+      return
+    }
+    navigateTo('/admin/review')
+  }
+
+  useEffect(() => {
+    if (!authChecked) {
+      return
+    }
+    if (routePath === '/submit' && !isAuthenticated) {
+      navigateTo('/auth')
+    }
+    if (routePath === '/admin/review' && !isAdmin) {
+      navigateTo('/')
+    }
+  }, [authChecked, routePath, isAuthenticated, isAdmin])
+
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } catch (error) {
+      console.error('Error logging out:', error)
+    } finally {
+      setIsAuthenticated(false)
+      setIsAdmin(false)
+      navigateTo('/')
+    }
+  }
 
   return (
     <div className="app-shell">
       <Header
         onBrandClick={() => navigateTo('/')}
         onAuthClick={() => navigateTo('/auth')}
+        onLogoutClick={handleLogout}
+        onSubmitClick={navigateToSubmit}
         onHomeClick={() => navigateTo('/')}
         hideSearch={!isHomeRoute}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         isDark={isDark}
+        isAuthenticated={isAuthenticated}
         onToggleTheme={() => setIsDark((previous) => !previous)}
       />
       <main className="content-wrap">
@@ -126,7 +217,14 @@ function App() {
 
             <section className="discovery-panel">
               <div className="filter-row">
-                <h2>Discover Software</h2>
+                <div className="filter-title-row">
+                  <h2>Discover Software</h2>
+                  {isAdmin && (
+                    <button type="button" className="admin-review-btn" onClick={navigateToAdminReview}>
+                      Review Software
+                    </button>
+                  )}
+                </div>
                 <div className="platform-filters">
                   {platformOptions.map((platform) => (
                     <button
@@ -156,17 +254,50 @@ function App() {
           </>
         )}
 
-        {isAuthRoute && <AuthPage apiBaseUrl={API_BASE_URL} onSuccess={() => navigateTo('/')} />}
+        {isAuthRoute && (
+          <AuthPage
+            apiBaseUrl={API_BASE_URL}
+            onSuccess={() => {
+              syncAuthState()
+              navigateTo('/')
+            }}
+          />
+        )}
+
+        {isSubmitRoute && isAuthenticated && (
+          <SubmitSoftwarePage
+            apiBaseUrl={API_BASE_URL}
+            onBack={() => navigateTo('/')}
+          />
+        )}
+
+        {isAdminReviewRoute && isAdmin && (
+          <AdminReviewPage apiBaseUrl={API_BASE_URL} onBack={() => navigateTo('/')} />
+        )}
+
+        {isPrivacyRoute && <PrivacyPage />}
+
+        {isSupportRoute && <SupportPage />}
 
         {isSoftwareDetailsRoute && (
           <SoftwareDetailsPage
             apiBaseUrl={API_BASE_URL}
             softwareId={softwareIdFromRoute}
+            isAuthenticated={isAuthenticated}
+            onRequireAuth={() => navigateTo('/auth')}
+            onAuthInvalid={() => {
+              setIsAuthenticated(false)
+              setIsAdmin(false)
+            }}
             onBack={() => navigateTo('/')}
           />
         )}
       </main>
-      <Footer />
+      <Footer
+        onSubmitClick={navigateToSubmit}
+        onPrivacyClick={() => navigateTo('/privacy')}
+        onSupportClick={() => navigateTo('/support')}
+      />
     </div>
   )
 }

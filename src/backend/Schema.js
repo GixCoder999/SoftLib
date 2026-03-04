@@ -11,7 +11,8 @@ const SoftwareSchema = new Schema({
   license: { type: String, required: true },
   repositoryUrl: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
-  isPremium: { type: Boolean, default: false }
+  isPremium: { type: Boolean, default: false },
+  reviewed: { type: Boolean, default: true },
 });
 
 const UserSchema = new Schema({

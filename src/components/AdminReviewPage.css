@@ -1,0 +1,110 @@
+.review-panel {
+  margin-top: 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+  padding: 1.2rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.review-panel h2 {
+  margin: 0;
+}
+
+.review-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.review-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.9rem;
+  background: var(--surface-soft);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.review-card h3,
+.review-card p {
+  margin: 0;
+}
+
+.review-card p {
+  color: var(--text-soft);
+}
+
+.review-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.review-meta div {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem;
+  background: var(--panel);
+  display: grid;
+  gap: 0.2rem;
+}
+
+.review-meta span {
+  color: var(--text-soft);
+  font-size: 0.83rem;
+}
+
+.review-meta strong {
+  color: var(--text-main);
+  overflow-wrap: anywhere;
+}
+
+.review-platforms,
+.review-link {
+  color: var(--text-main);
+}
+
+.review-link a {
+  color: var(--primary-strong);
+  overflow-wrap: anywhere;
+}
+
+.review-actions {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.danger-btn {
+  border-color: #f0a5a5;
+  color: #a42323;
+}
+
+.danger-btn:hover {
+  border-color: #e37777;
+  color: #8a1919;
+}
+
+.review-error {
+  color: #c62828;
+  font-weight: 700;
+  margin: 0;
+}
+
+.review-empty {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+@media (max-width: 860px) {
+  .review-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 580px) {
+  .review-meta {
+    grid-template-columns: 1fr;
+  }
+}

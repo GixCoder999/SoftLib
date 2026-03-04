@@ -7,8 +7,11 @@ function Header({
   onToggleTheme,
   hideSearch,
   onAuthClick,
+  onLogoutClick,
+  onSubmitClick,
   onHomeClick,
   onBrandClick,
+  isAuthenticated,
 }) {
   return (
     <header className="topbar">
@@ -35,9 +38,18 @@ function Header({
           <button type="button" className="linkish" onClick={onHomeClick}>
             Home
           </button>
-          <button type="button" className="linkish" onClick={onAuthClick}>
-            Sign In / Up
+          <button type="button" className="linkish" onClick={onSubmitClick}>
+            Submit
           </button>
+          {isAuthenticated ? (
+            <button type="button" className="linkish" onClick={onLogoutClick}>
+              Logout
+            </button>
+          ) : (
+            <button type="button" className="linkish" onClick={onAuthClick}>
+              Sign In / Up
+            </button>
+          )}
         </nav>
         <button
           type="button"

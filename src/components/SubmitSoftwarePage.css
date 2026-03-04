@@ -1,0 +1,66 @@
+.submit-panel {
+  margin-top: 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+  padding: 1.2rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.submit-form {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.submit-form h2 {
+  margin: 0 0 0.35rem;
+}
+
+.submit-form label {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.submit-form input,
+.submit-form textarea {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.95rem;
+  background: var(--panel);
+  color: var(--text-main);
+}
+
+.submit-form textarea {
+  resize: vertical;
+}
+
+.platform-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 0.35rem;
+}
+
+.platform-option {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.45rem 0.65rem;
+  background: var(--surface-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.submit-error {
+  color: #c62828;
+  font-weight: 700;
+  margin: 0.25rem 0 0;
+}
+
+.submit-message {
+  color: #1d7d42;
+  font-weight: 700;
+  margin: 0.25rem 0 0;
+}

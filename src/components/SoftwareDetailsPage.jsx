@@ -1,7 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './SoftwareDetailsPage.css'
 
-function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack }) {
+function SoftwareDetailsPage({
+  apiBaseUrl,
+  softwareId,
+  onBack,
+  isAuthenticated,
+  onRequireAuth,
+  onAuthInvalid,
+}) {
   const [software, setSoftware] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -11,6 +18,7 @@ function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack }) {
   const [selectedReview, setSelectedReview] = useState(0)
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
   const [reviewFeedback, setReviewFeedback] = useState('')
+  const downloadInFlightRef = useRef(false)
 
   useEffect(() => {
     let isMounted = true
@@ -45,7 +53,16 @@ function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack }) {
   }, [apiBaseUrl, softwareId])
 
   const startDownload = async () => {
-    if (downloading) {
+    if (downloading || downloadInFlightRef.current) {
+      return
+    }
+    downloadInFlightRef.current = true
+
+    setError('')
+    if (software?.isPremium && !isAuthenticated) {
+      setError('Sign in is required to download premium software.')
+      onRequireAuth?.()
+      downloadInFlightRef.current = false
       return
     }
 
@@ -59,10 +76,16 @@ function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack }) {
     }
 
     try {
-      const response = await fetch(`${apiBaseUrl}/software/${softwareId}/download?redirect=false`)
-      const result = await response.json()
+      const response = await fetch(`${apiBaseUrl}/software/${softwareId}/download?redirect=false`, {
+        credentials: 'include',
+      })
+      const result = await response.json().catch(() => ({}))
 
       if (!response.ok) {
+        if (response.status === 401) {
+          onAuthInvalid?.()
+          onRequireAuth?.()
+        }
         throw new Error(result.error || 'Failed to prepare download')
       }
 
@@ -79,13 +102,10 @@ function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack }) {
               : (Number.isFinite(currentSoftware.downloads) ? currentSoftware.downloads + 1 : 1),
           }
         })
-        const popup = window.open(result.downloadUrl, '_blank', 'noopener,noreferrer')
-        if (!popup) {
-          window.location.assign(result.downloadUrl)
-        }
         setSelectedReview(0)
         setReviewFeedback('')
         setIsReviewModalOpen(true)
+        window.open(result.downloadUrl, '_blank', 'noopener,noreferrer')
       } else {
         throw new Error('Download URL missing in response')
       }
@@ -93,6 +113,7 @@ function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack }) {
       setError(requestError.message)
     } finally {
       setDownloading(false)
+      downloadInFlightRef.current = false
     }
   }
 
@@ -114,6 +135,7 @@ function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack }) {
   const platforms = Array.isArray(software?.platforms) ? software.platforms : []
   const review = Number.isFinite(software?.review) ? software.review : 0
   const downloads = Number.isFinite(software?.downloads) ? software.downloads : 0
+  const requiresSigninForDownload = Boolean(software?.isPremium && !isAuthenticated)
 
   const submitReview = async () => {
     if (!selectedReview || reviewSubmitting) {
@@ -198,7 +220,11 @@ function SoftwareDetailsPage({ apiBaseUrl, softwareId, onBack }) {
       </div>
 
       <button type="button" className="download-btn" onClick={startDownload} disabled={downloading}>
-        {downloading && countdown > 0 ? `Starting download in ${countdown}s...` : 'Download'}
+        {downloading && countdown > 0
+          ? `Starting download in ${countdown}s...`
+          : requiresSigninForDownload
+            ? 'Sign In to Download'
+            : 'Download'}
       </button>
 
       {error && <p className="details-error">{error}</p>}

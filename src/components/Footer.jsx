@@ -1,13 +1,19 @@
 import './Footer.css'
 
-function Footer() {
+function Footer({ onSubmitClick, onPrivacyClick, onSupportClick }) {
   return (
     <footer className="footer">
       <p>SoftLib © 2026</p>
       <div>
-        <a href="#">Submit Software</a>
-        <a href="#">Privacy</a>
-        <a href="#">Support</a>
+        <button type="button" className="footer-linkish" onClick={onSubmitClick}>
+          Submit Software
+        </button>
+        <button type="button" className="footer-linkish" onClick={onPrivacyClick}>
+          Privacy
+        </button>
+        <button type="button" className="footer-linkish" onClick={onSupportClick}>
+          Support
+        </button>
       </div>
     </footer>
   )

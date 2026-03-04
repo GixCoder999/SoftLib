@@ -25,10 +25,32 @@
   flex-wrap: wrap;
 }
 
+.filter-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .filter-row h2 {
   margin: 0;
   color: var(--text-main);
   font-size: clamp(1.2rem, 2vw, 1.55rem);
+}
+
+.admin-review-btn {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.45rem 0.8rem;
+  background: var(--surface-soft);
+  color: var(--text-main);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-review-btn:hover {
+  border-color: #9fb8ff;
+  color: var(--primary-strong);
 }
 
 .platform-filters {
