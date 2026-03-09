@@ -12,21 +12,7 @@ import AdminReviewPage from './components/AdminReviewPage'
 import PrivacyPage from './components/PrivacyPage'
 import SupportPage from './components/SupportPage'
 
-const TestConnection = async () => {
-  try {
-    const response = await fetch('http://localhost:5000')
-    const data = await response.json()
-    console.log('Backend response:', data)
-  } catch (error) {
-    console.error('Error connecting to backend:', error)
-  }
-}
-
-TestConnection();
-
-//const softwareData = [];
-
-const API_BASE_URL = 'http://localhost:5000'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() || 'http://localhost:5000'
 const platformOptions = ['All', 'Windows', 'macOS', 'Linux', 'Android', 'iOS']
 
 function App() {
